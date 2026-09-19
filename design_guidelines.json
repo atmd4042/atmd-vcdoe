@@ -1,0 +1,153 @@
+{
+  "app_name": "اعتمد (Aetamd)",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "An authoritative, trustworthy, and premium e-services platform grounded in deep palm greens and warm sand neutrals.",
+  "color": {
+    "surface": "#FAFAFA",
+    "onSurface": "#111827",
+    "surfaceSecondary": "#FFFFFF",
+    "onSurfaceSecondary": "#374151",
+    "surfaceTertiary": "#F3F4F6",
+    "onSurfaceTertiary": "#4B5563",
+    "surfaceInverse": "#1F2937",
+    "onSurfaceInverse": "#F9FAFB",
+    "brand": "#057A55",
+    "onBrand": "#FFFFFF",
+    "brandPrimary": "#046C4E",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#D1FAE5",
+    "onBrandSecondary": "#065F46",
+    "brandTertiary": "#ECFDF5",
+    "onBrandTertiary": "#065F46",
+    "success": "#10B981",
+    "onSuccess": "#FFFFFF",
+    "warning": "#F59E0B",
+    "onWarning": "#FFFFFF",
+    "error": "#EF4444",
+    "onError": "#FFFFFF",
+    "info": "#14B8A6",
+    "onInfo": "#FFFFFF",
+    "border": "#E5E7EB",
+    "borderStrong": "#D1D5DB",
+    "divider": "#F3F4F6",
+    "muted": "#6B7280"
+  },
+  "typography": {
+    "displayFontFamily": "Tajawal",
+    "textFontFamily": "Tajawal",
+    "scale": { "sm": 12, "base": 14, "lg": 16, "xl": 20, "2xl": 24 }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room. Avoid dense layouts.",
+    "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "2xl": 32, "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "1",
+  "navigation": "bottom_tabs",
+  "icon_set": "Ionicons",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": ["Sticky header backgrounds over scrolling content", "Bottom tab bar", "Hero/featured cards frosted glass overlay"],
+    "dont's": ["Form fields", "Body text regions", "Cards in dense lists"]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "haptics": {
+    "events": {
+      "primary_button_press": "impactMedium",
+      "tab_change": "selection",
+      "status_success": "notificationSuccess",
+      "status_error": "notificationError",
+      "toggle_switch": "selection"
+    }
+  },
+  "screens": [
+    {
+      "name": "Customer Dashboard (Home)",
+      "purpose": "Primary landing screen for users to quickly access top government/business services, view pending request status, and access the wallet.",
+      "states": {
+        "loading": "Centered spinner with a subtle brand-tinted pulse.",
+        "empty": "N/A for home. For 'My Requests', use a document illustration + 'لا توجد طلبات حالية'.",
+        "error": "Card displaying 'حدث خطأ في تحميل الخدمات' مع زر 'إعادة المحاولة' (Retry button)."
+      },
+      "layout": "Sticky header with user greeting and notification bell (glassmorphism). Top section features a hero/status card with gradient overlay. Below: 'Quick Access' horizontal scroll of categories (rounded icons in brandTertiary squares). Below: Vertical list of 'Recent Services' or 'My Pending Requests'."
+    },
+    {
+      "name": "Service Request Form",
+      "purpose": "Dynamic form for customers to fill out requirements for a specific service (e.g., visa extension) with a clear sticky CTA.",
+      "states": {
+        "loading": "Skeleton lines for form fields.",
+        "empty": "N/A",
+        "error": "Inline validation errors below inputs in 'error' color."
+      },
+      "layout": "Single column vertical layout. Labels above inputs. Progress indicator if multi-step. Primary CTA 'إرسال الطلب' (Submit Request) is sticky at the bottom inside KeyboardAvoidingView over a glass background."
+    },
+    {
+      "name": "Wallet / Top-up",
+      "purpose": "Allow users to view balance and top up via card or subscription.",
+      "states": {
+        "loading": "Spinner over balance card.",
+        "empty": "No transaction history illustration.",
+        "error": "Payment failed state with 'error' banner."
+      },
+      "layout": "Large hero card at the top displaying current balance with abstract finance background image. Below: Two primary actions (Top-up, Withdraw). Below: List of recent transactions with dividers."
+    },
+    {
+      "name": "Provider Dashboard",
+      "purpose": "Office dashboard to view and manage customer service requests.",
+      "states": {
+        "loading": "Skeleton cards.",
+        "empty": "Empty state illustration with 'لا توجد طلبات جديدة'.",
+        "error": "Failed to load requests error state."
+      },
+      "layout": "Top metric cards (Pending, Completed). Vertical list of request cards showing customer name, service type, and status badge."
+    },
+    {
+      "name": "Admin Dashboard",
+      "purpose": "Central control to approve providers, manage services, and oversee system health.",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "No pending approvals.",
+        "error": "Connection error state."
+      },
+      "layout": "Grid of management categories (Providers, Services, Users). Clicking one opens a list view with inline approve/reject actions."
+    }
+  ],
+  "images": {
+    "hero_background": {
+      "url": "https://images.pexels.com/photos/32284723/pexels-photo-32284723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "dark": "https://images.pexels.com/photos/31280908/pexels-photo-31280908.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "alt": "Abstract modern architecture background"
+    },
+    "wallet_background": {
+      "url": "https://images.pexels.com/photos/12969363/pexels-photo-12969363.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "dark": "https://images.pexels.com/photos/8062364/pexels-photo-8062364.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "alt": "Professional abstract finance and wallet"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly adhere to the NO BLUE/PURPLE color rule. The primary brand color is deep Palm Green (#046C4E) to convey government/official trust in the Middle East.",
+    "Implement Arabic RTL direction logically. Ensure you use `margin-inline-start`, `padding-inline-end`, and `I18nManager.forceRTL(true)`. Align text to the right by default.",
+    "Use 'Tajawal' as the default font. Arabic UI needs slightly larger text. Use the 'lg' (16px) or 'xl' (20px) tokens for primary body/reading text rather than 'base' (14px) to ensure readability, as Arabic glyphs are smaller than Latin equivalents.",
+    "Do not add letter spacing to Arabic text (keep letter-spacing: 0). Use a line-height of 1.6 to 1.8.",
+    "When rendering images with text overlays (like the wallet balance or home hero card), you MUST apply the top-to-bottom transparent-to-dark gradient scrim to guarantee WCAG contrast.",
+    "Include haptic feedback mapped exactly as requested in the JSON. The tactile feel is crucial for a premium iOS-Native Clean app.",
+    "For the Service Request Form, ensure the primary submit button is sticky at the bottom of the screen (in a safe-area aware container with glassmorphism), not inline with the scrolling content.",
+    "Do NOT show any Emergent branding/logos anywhere as explicitly requested by the user."
+  ]
+}

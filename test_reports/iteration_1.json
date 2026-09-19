@@ -1,0 +1,47 @@
+{
+  "summary": "Full backend + smoke frontend test of Aetamd (اعتمد). 15/15 backend pytest cases PASS covering auth (register/login OTP), 9 Arabic categories, 86 services, featured chip, service requirements text on حساب المواطن/حافز/التسجيل في قياس, provider approval + login block until approved, customer request creation, provider accept flow, customer info visibility after in_progress, chat bidirectional with notifications, targeted admin notes (audience=user by email), 25% discount targeted to user reflected in /my-discount and request price math, provider suspension blocks chat and status update (403), soft-delete request removes from customer list, notifications unread-count + read-all. Frontend UI: login screen loads with black+gold theme, customer registration with OTP AUTO-FILL via /auth/otp-by-challenge works, verify screen shows 6-digit OTP populated, role routing lands on customer (customer) home with services/notifications tabs. Admin login via OTP auto-fills and lands on admin dashboard showing counts (9 customers, 2 providers, 86 services, 7 requests). No red-screen, no runtime errors observed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "server.py", "issue": "Stripe / wallet / subscription routes and models still present although PRD says wallet+subscriptions REMOVED (POST /api/wallet/topup, /api/subscriptions/checkout, /api/payments/verify, /api/stripe/webhook, /api/wallet, /api/subscription-plans, plus SUBSCRIPTION_PLANS constant and _fulfill helper). Dead code; recommend removal to match spec and drop stripe dependency."},
+      {"endpoint": "startup()", "issue": "user document still writes wallet_balance and subscription fields at seed/register; should be dropped to match removed feature."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "(admin) bottom tabs", "issues": ["Some tab labels not observed in DOM snapshot ('المزودين','المستخدمين' rendered as different keys 'مقدمو الخدمة','المستخدمون') — cosmetic string inconsistency vs PRD wording; navigation itself works."]}
+    ],
+    "react_native_issues": [
+      {"component": "console warning", "issue": "'props.pointerEvents is deprecated. Use style.pointerEvents' surfaced during page load. Non-blocking but tracks a deprecated RN Web pattern coming from a library — likely react-native-web or a UI dep. Reference: browser console during initial load."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_aetamd_flows.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional cleanup) Remove wallet/subscription/stripe routes, models, and startup fields from /app/backend/server.py to match PRD (wallet & subscriptions removed).",
+    "Investigate 'props.pointerEvents is deprecated' console warning source and migrate to style.pointerEvents.",
+    "Consider splitting /app/backend/server.py (1225 lines) into modules (auth, catalog, requests, admin, chat) for maintainability — exceeds 700-line guideline."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 1225 lines — should be split into focused modules per code_review_guidelines (>700 lines).",
+    "clean() strips _id and password_hash consistently — good; but a few endpoints (e.g. /admin/users PUT, /profile PUT) fetch without projection and then return the raw dict pre-cleanup — verified they use projections {'_id':0,'password_hash':0}, so safe.",
+    "make_token puts role in JWT but current_user re-reads role from DB (good for role changes).",
+    "Password policy string mentions requirements but doesn't require digits, matching PRD ('8+, upper, lower, symbol') — consistent.",
+    "Categories are correctly seeded exactly 9 in catalog_v3.",
+    "otp-by-challenge is unauthenticated by design (client holds challenge_id secret) — acceptable for preview auto-fill."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_aetamd_flows.py (new)",
+    "/app/test_reports/iteration_1.json (new)"
+  ],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "100% smoke (login/register/OTP-autofill/role-routing/admin-dashboard verified)"},
+  "seed_data_creation": "Tests create ephemeral users using timestamped emails (ui_*, prov_*, cust_*, x_*, p1_*, p2_*, p3_*). Admin-created discount (audience=user, 25%) and targeted note (audience=user) also seeded during full_flow test. Nothing persistent beyond test run except a service potentially updated to price=100 if all catalog prices were 0 (idempotent — one service).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite lives at /app/backend/tests/test_aetamd_flows.py — 15 tests, run with `pytest /app/backend/tests/test_aetamd_flows.py -v --junitxml=/app/test_reports/pytest/pytest_results.xml`. Uses EXPO_PUBLIC_BACKEND_URL then falls back to public preview URL. Requires ALLOW_TEST_OTP=1 (currently set) for /api/auth/test-otp. Frontend testIDs used: login-identifier, login-password, login-submit, go-register, reg-name/office/email/phone/password/confirm, reg-submit, otp-input, verify-submit, resend-otp, chip-all/featured/<catId>, service-<id>, type-visitor/resident/citizen/gulf_id, notes-input, submit-request, requirements-box, role-customer/service_provider, lang-toggle.",
+  "rca_of_issue": "N/A — no failing feature. Only cleanup items (leftover wallet/subscription/stripe code) surfaced by code review."
+}
