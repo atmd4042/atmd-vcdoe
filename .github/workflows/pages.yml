@@ -1,0 +1,50 @@
+name: Publish ATMD site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "doc/**"
+      - "app.html"
+      - "supabase-config.js"
+      - "supabase-runtime.js"
+      - "supabase/**"
+      - "index.html"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Include Etemad application
+        run: |
+          mkdir -p doc
+          cp index.html doc/index.html
+          cp app.html doc/app.html
+          cp supabase-config.js doc/supabase-config.js
+          cp supabase-runtime.js doc/supabase-runtime.js
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
