@@ -558,3 +558,16 @@ begin
     alter publication supabase_realtime add table public.notifications;
   end if;
 end $$;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.service_categories, public.services to anon, authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name, phone) on public.profiles to authenticated;
+grant insert, update on public.services to authenticated;
+grant select, insert, update on public.orders to authenticated;
+grant select, insert on public.order_files, public.order_messages to authenticated;
+grant select on public.notifications to authenticated;
+grant update (read_at) on public.notifications to authenticated;
+grant usage, select on sequence public.order_number_seq to authenticated;
+grant usage on schema storage to authenticated;
+grant select, insert on storage.objects to authenticated;
