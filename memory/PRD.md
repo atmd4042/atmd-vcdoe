@@ -33,6 +33,9 @@ Arabic-first (AR/EN, RTL) electronic-services platform "اعتمد". Three roles
 - [x] Wallet & subscriptions REMOVED from UI (legacy backend routes remain unused/harmless).
 - [x] Black+gold theme, RTL, AR/EN toggle, contact/WhatsApp, /login web redirect for providers.
 - [x] Tested: 15/15 backend pytest + frontend smoke (testing agent iteration_1) — no blockers.
+- [x] Push notifications (Emergent-managed): backend /register-push + send_push on new request; client registration + tap handlers + Android channel in _layout. Needs google-services.json + deploy/build to work on device.
+- [x] Fixed crash "Pressable is not defined" (missing import in admin providers).
+- [x] Social: YouTube (اعتمد channel) + TikTok (atmd4042) in Contact Us, editable via admin settings (contact_youtube/contact_tiktok).
 
 ## Backlog / remaining
 - P1: Real push notifications (lock-screen) — requires Emergent push integration + deploy + native build (google-services.json).

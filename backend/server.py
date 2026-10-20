@@ -9,6 +9,7 @@ from typing import List, Optional
 
 import jwt
 import stripe
+import httpx
 from bson import ObjectId  # noqa: F401  (kept for parity, ids are uuid strings)
 from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Form, Request, Response, BackgroundTasks
@@ -40,6 +41,11 @@ JWT_EXPIRE_MIN = int(os.environ.get("JWT_EXPIRE_MIN", "1440"))
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY") or None
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET") or ""
+
+# Emergent managed push notifications (SuprSend relay)
+PUSH_BASE_URL = "https://integrations.emergentagent.com"
+PUSH_KEY = os.environ.get("EMERGENT_PUSH_KEY", "placeholder")
+_push_client = httpx.AsyncClient(base_url=PUSH_BASE_URL, headers={"X-Push-Key": PUSH_KEY}, timeout=10.0)
 
 app = FastAPI()
 api = APIRouter(prefix="/api")
@@ -123,6 +129,18 @@ async def notify(user_id: str, title: str, body: str, ntype: str, ref_id: Option
         "id": new_id(), "user_id": user_id, "title": title, "body": body,
         "type": ntype, "ref_id": ref_id, "read": False, "created_at": now(),
     })
+
+
+async def send_push(recipients: List[str], data: dict, idempotency_key: Optional[str] = None) -> None:
+    if not recipients or "title" not in data or "message" not in data:
+        return
+    for i in range(0, len(recipients), 100):
+        chunk = recipients[i:i + 100]
+        payload: dict = {"recipients": chunk, "data": data}
+        if idempotency_key:
+            payload["$idempotency_key"] = idempotency_key
+        resp = await _push_client.post("/api/v1/push/trigger", json=payload)
+        resp.raise_for_status()
 
 
 async def applicable_discount(user: dict):
@@ -222,6 +240,12 @@ class MessageIn(BaseModel):
     text: str
 
 
+class RegisterPushBody(BaseModel):
+    user_id: str
+    platform: str
+    device_token: str
+
+
 class NoteIn(BaseModel):
     title: str
     body: str
@@ -247,6 +271,8 @@ class SettingsIn(BaseModel):
     contact_phone: Optional[str] = None
     contact_email: Optional[str] = None
     contact_whatsapp: Optional[str] = None
+    contact_youtube: Optional[str] = None
+    contact_tiktok: Optional[str] = None
 
 
 class TopupIn(BaseModel):
@@ -620,6 +646,17 @@ async def me(user=Depends(current_user)):
     return user
 
 
+@api.post("/register-push", status_code=201)
+async def register_push(body: RegisterPushBody):
+    try:
+        resp = await _push_client.post("/api/v1/push/users/register", json=body.model_dump())
+        resp.raise_for_status()
+    except Exception as e:
+        logger.warning(f"register-push failed (non-blocking): {e}")
+        return {"status": "skipped"}
+    return {"status": "registered"}
+
+
 @api.get("/auth/otp-by-challenge/{challenge_id}")
 async def otp_by_challenge(challenge_id: str):
     # Returns the code for a specific challenge the client already initiated
@@ -751,8 +788,17 @@ async def create_request(body: RequestIn, user=Depends(require("customer"))):
         {"role": "service_provider", "approved": True, "suspended": {"$ne": True}, "deleted_at": None},
         {"id": 1},
     ).to_list(2000)
-    for p in provs:
-        await notify(p["id"], "طلب خدمة جديد", f"{svc['name']} — {user['name']}", "request", rid)
+    prov_ids = [p["id"] for p in provs]
+    for pid in prov_ids:
+        await notify(pid, "طلب خدمة جديد", f"{svc['name']} — {user['name']}", "request", rid)
+    try:
+        await send_push(
+            recipients=prov_ids,
+            data={"title": "طلب خدمة جديد", "message": f"{svc['name']} — {user['name']}", "action_url": "/(provider)"},
+            idempotency_key=rid,
+        )
+    except Exception as e:
+        logger.warning(f"Push failed (non-blocking): {e}")
     return clean(doc)
 
 
