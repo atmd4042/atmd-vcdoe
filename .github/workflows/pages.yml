@@ -32,6 +32,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Include Etemad application
         run: |
           mkdir -p doc
@@ -39,12 +40,16 @@ jobs:
           cp app.html doc/app.html
           cp supabase-config.js doc/supabase-config.js
           cp supabase-runtime.js doc/supabase-runtime.js
+          printf '%s\n' 'atmd.shop' > doc/CNAME
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           path: doc
+
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
