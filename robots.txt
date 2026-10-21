@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Host: atmd.shop
+Sitemap: https://atmd.shop/sitemap.xml
